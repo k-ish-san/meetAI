@@ -13,6 +13,7 @@ import { authClient } from "@/lib/auth-client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Alert, AlertTitle } from "@/components/ui/alert";
+import {FaGoogle, FaGithub} from 'react-icons/fa';
 import {
   Form,
   FormControl,
@@ -22,15 +23,12 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 
-
-
 const formSchema = z.object({
   email: z.string().email(),
   password: z.string().min(1, { message: "Password is required" }),
 });
 
-export const SignInView = () =>
-{
+export const SignInView = () => {
   const router = useRouter();
   const [error, setError] = useState<string | null>(null);
   const [pending, setPending] = useState(false);
@@ -46,23 +44,45 @@ export const SignInView = () =>
     setError(null);
     setPending(true);
 
-      authClient.signIn.email({
-      email: data.email,
-      password: data.password,
-    },
-    {
-      onSuccess: () =>
+    authClient.signIn.email(
       {
-        setPending(false);
-        router.push("/");
+        email: data.email,
+        password: data.password,
+        callbackURL: "/",
       },
-      onError: ({ error }) =>
       {
-        setPending(false);
-        setError(error.message);
+        onSuccess: () => {
+          setPending(false);
+          router.push("/");
+        },
+        onError: ({ error }) => {
+          setPending(false);
+          setError(error.message);
+        },
+      }
+    );
+  };
+
+  const onSocial = (provider: "github" | "google") => {
+    setError(null);
+    setPending(true);
+
+    authClient.signIn.social(
+      {
+        provider: provider,
+        callbackURL: "/", 
       },
-        });
-   
+      {
+        onSuccess: () => {
+          setPending(false);
+       
+        },
+        onError: ({ error }) => {
+          setPending(false);
+          setError(error.message);
+        },
+      }
+    );
   };
 
   return (
@@ -130,11 +150,28 @@ export const SignInView = () =>
                   </span>
                 </div>
                 <div className="grid grid-cols-2 gap-4">
-                  <Button disabled={pending} variant="outline" type="button" className="w-full">
-                    Google
+                  <Button
+                    disabled={pending}
+                    onClick={() => {
+                      onSocial("google");
+                    }}
+                    variant="outline"
+                    type="button"
+                    className="w-full"
+                  >
+                    <FaGoogle/>
+                 
                   </Button>
-                  <Button disabled={pending} variant="outline" className="w-full">
-                    GitHub
+                  <Button
+                    disabled={pending}
+                    onClick={() => {
+                      onSocial("github");
+                      
+                    }}
+                    variant="outline"
+                    className="w-full"
+                  >
+                    <FaGithub />
                   </Button>
                 </div>
                 <div className="text-center text-sm">
@@ -156,8 +193,8 @@ export const SignInView = () =>
         </CardContent>
       </Card>
       <div className="text-muted-foreground *:[a]:hover:text-primary text-center text-xs text-balance *:[a]:underline *:[a]underline-offset-4">
-        By clicking continue, you agree to our <a href="#">Terms of Service</a> and{" "}
-        <a href="#">Privacy Policy</a>.
+        By clicking continue, you agree to our <a href="#">Terms of Service</a>{" "}
+        and <a href="#">Privacy Policy</a>.
       </div>
     </div>
   );
