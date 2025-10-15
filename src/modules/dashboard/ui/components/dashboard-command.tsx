@@ -17,7 +17,7 @@ export const DashboardCommand = ({ open, setOpen }: Props) => {
       <CommandInput placeholder="Find a meeting or agent" />
           <CommandList>
               <CommandItem>
-                  Test
+                  Test1
         </CommandItem>
          <CommandItem>
                   Test2
